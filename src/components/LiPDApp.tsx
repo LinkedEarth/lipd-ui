@@ -1,8 +1,8 @@
 import React from 'react';
-import { Box, Divider } from '@mui/material';
+import { Box } from '@mui/material';
 import { NavigationPanel } from './NavigationPanel';
 import { Router } from '../router';
-import AppBarBreadcrumbs from './AppBarBreadcrumbs';
+import Header from './Header';
 import ConfirmDialog from './ConfirmDialog';
 import { useLiPDStore } from '../store';
 
@@ -26,41 +26,40 @@ export const LiPDApp: React.FC = () => {
   };
 
   return (
-    <div>
-        <Box sx={{ px: 2, py: 1 }}>
-            <AppBarBreadcrumbs />
-        </Box>
-        <Divider />    
-        <Box sx={{ display: 'flex', height: '100%' }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* Top application bar */}
+      <Header />
+
+      {/* Main area */}
+      <Box sx={{ display: 'flex', flex: '1 1 auto', overflow: 'hidden' }}>
         {/* Left panel - Navigation */}
-        <Box sx={{ 
-            width: 300, 
-            flexShrink: 0, 
-            borderRight: 1, 
+        <Box
+          sx={{
+            width: { xs: 220, md: 260 },
+            flexShrink: 0,
+            borderRight: 1,
             borderColor: 'divider',
-            overflow: 'auto'
-        }}>
-            <NavigationPanel />
-        </Box>
-        
-        {/* Right panel - Content */}
-        <Box sx={{ 
-            flex: 1, 
+            bgcolor: 'background.paper',
             overflow: 'auto',
-            p: 2
-        }}>
-            <Router />
-        </Box>
+          }}
+        >
+          <NavigationPanel />
         </Box>
 
-        {/* Sync Confirmation Dialog */}
-        <ConfirmDialog
-          open={syncConfirmDialogOpen}
-          title="Sync to GraphDB"
-          message="Are you sure you want to sync this dataset to GraphDB? This action will update the remote database and requires authentication credentials."
-          onConfirm={handleSyncConfirm}
-          onCancel={handleSyncCancel}
-        />
-    </div>
+        {/* Right panel - Content */}
+        <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
+          <Router />
+        </Box>
+      </Box>
+
+      {/* Sync Confirmation Dialog */}
+      <ConfirmDialog
+        open={syncConfirmDialogOpen}
+        title="Sync to GraphDB"
+        message="Are you sure you want to sync this dataset to GraphDB? This action will update the remote database and requires authentication credentials."
+        onConfirm={handleSyncConfirm}
+        onCancel={handleSyncCancel}
+      />
+    </Box>
   );
 }; 

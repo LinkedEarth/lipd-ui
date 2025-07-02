@@ -1,6 +1,6 @@
 // Re-export label helper functions for LiPD UI components
 
-import { Change, ChangeLog, ChronData, DataTable, Funding, PaleoData, Person, Publication, Variable, Compilation } from "lipdjs";
+import { Change, ChangeLog, ChronData, DataTable, Funding, PaleoData, Person, Publication, Variable, Compilation, Interpretation, Calibration } from "lipdjs";
 
 export const getPublicationAuthorsLabel = (publication: Publication) : string => {
     return publication.authors.map((author) => author.name).join(', ');
@@ -72,4 +72,15 @@ export const getChangeLogEntryLabel = (changeLogEntry: Change) : string => {
 
 export const getCompilationNameLabel = (compilation: Compilation) : string => {
     return compilation.name || '';
+};
+
+// Interpretation label helper
+export const getInterpretationLabel = (interp: Interpretation): string => {
+  const variableLabel = interp.variable?.getLabel() || interp.variable?.getId() || '';
+  const scope = interp.scope || '';
+  return scope ? `${variableLabel} (${scope})` : variableLabel;
+};
+
+export const getCalibrationLabel = (cal: Calibration): string => {
+  return cal.method || '';
 }; 

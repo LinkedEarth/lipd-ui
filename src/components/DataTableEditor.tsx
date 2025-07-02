@@ -18,7 +18,7 @@ export const DataTableEditor: React.FC<EditorProps> = ({ path, params, onUpdate,
     const dataset = useLiPDStore((state: any) => state.dataset);
     
     const [page, setPage] = React.useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(10);
+    const [rowsPerPage, setRowsPerPage] = React.useState(25);
     const [csvDialogOpen, setCsvDialogOpen] = React.useState(false);
     const [csvContent, setCsvContent] = React.useState('');
     
@@ -193,7 +193,7 @@ export const DataTableEditor: React.FC<EditorProps> = ({ path, params, onUpdate,
                 <Typography variant="h6">{title}</Typography>
                 {!readonly && <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button
-                        variant="contained"
+                        variant="outlined"
                         startIcon={<FileUploadIcon />}
                         size="small"
                         component="label"
@@ -207,7 +207,7 @@ export const DataTableEditor: React.FC<EditorProps> = ({ path, params, onUpdate,
                         />
                     </Button>
                     <Button
-                        variant="contained"
+                        variant="outlined"
                         startIcon={<FileDownloadIcon />}
                         size="small"
                         onClick={handleExportCSV}
@@ -215,7 +215,7 @@ export const DataTableEditor: React.FC<EditorProps> = ({ path, params, onUpdate,
                         Export CSV
                     </Button>
                     <Button
-                        variant="contained"
+                        variant="outlined"
                         startIcon={<AddIcon sx={{fontSize: 18}}/>}
                         size="small"
                         onClick={handleAddRow}
@@ -270,6 +270,39 @@ export const DataTableEditor: React.FC<EditorProps> = ({ path, params, onUpdate,
                         setRowsPerPage(params.pageSize);
                     }}
                     disableRowSelectionOnClick
+                    disableColumnMenu
+                    rowHeight={32}
+                    columnHeaderHeight={38}
+                    sx={{
+                        fontFamily: 'monospace',
+                        '& .MuiDataGrid-columnHeaders': {
+                            backgroundColor: (theme) => theme.palette.mode === 'light' ? theme.palette.grey[200] : theme.palette.grey[800],
+                            fontWeight: 700,
+                            borderBottom: 1,
+                            borderColor: 'divider',
+                            textTransform: 'uppercase',
+                            fontSize: '0.75rem',
+                        },
+                        '& .MuiDataGrid-columnHeaderTitle': {
+                            overflow: 'visible',
+                        },
+                        '& .MuiDataGrid-cell': {
+                            borderRight: '1px solid',
+                            borderColor: 'divider',
+                            fontSize: '0.75rem',
+                            py: 0,
+                        },
+                        '& .MuiDataGrid-row': {
+                            borderBottom: '1px solid',
+                            borderColor: 'divider',
+                            maxHeight: 32,
+                        },
+                        '& .MuiDataGrid-virtualScrollerRenderZone': {
+                            '& .MuiDataGrid-row:last-of-type': {
+                                borderBottom: 0,
+                            },
+                        },
+                    }}
                 />
             </Box>
 

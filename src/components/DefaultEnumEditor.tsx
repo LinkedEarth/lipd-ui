@@ -2,7 +2,8 @@ import React from 'react';
 import {  
     Box, 
     MenuItem,
-    Typography
+    Typography,
+    Chip
 } from '@mui/material';
 
 import { SynonymEntry } from 'lipdjs';
@@ -40,11 +41,28 @@ export const DefaultEnumEditor: React.FC<EditorProps> = ({
     if (readonly) {
         if (!displayValue) return null;
         return (
-            <Box sx={{ py:0.5 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
-                    {fieldSchema.label}:
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    py: 0.5,
+                    columnGap: 1,
+                }}
+            >
+                <Typography
+                    variant="subtitle2"
+                    color="text.secondary"
+                    sx={{ flexBasis: { xs: '35%', sm: '25%', md: '20%' }, flexShrink: 0, fontWeight: 500 }}
+                >
+                    {fieldSchema.label}
                 </Typography>
-                <Typography component="span">{displayValue}</Typography>
+                <Chip
+                    label={displayValue}
+                    size="medium"
+                    color="primary"
+                    variant="outlined"
+                    sx={{ flex: '0 0 auto' }}
+                />
             </Box>
         );
     }

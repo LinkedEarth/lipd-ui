@@ -48,15 +48,32 @@ export const FormTextField = React.memo(({
     if (disabled) {
         if (value === undefined || value === null || value.toString().trim() === '') return null;
         return (
-            <Box sx={{ py: 0.5 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
-                    {label}:
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    py: 0.5,
+                    columnGap: 1,
+                }}
+            >
+                <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ flexBasis: { xs: '35%', sm: '25%', md: '20%' }, flexShrink: 0, fontWeight: 500 }}
+                >
+                    {label}
                 </Typography>
-                {typeof value === 'string' && value.match(/^https?:\/\//) ? (
-                    <Link href={value} target="_blank" rel="noopener noreferrer">{value}</Link>
-                ) : (
-                    <Typography component="span">{value}</Typography>
-                )}
+                <Box sx={{ flex: 1 }}>
+                    {typeof value === 'string' && value.match(/^https?:\/\//) ? (
+                        <Link href={value} target="_blank" rel="noopener noreferrer" underline="hover" sx={{ fontSize: '1rem' }}>
+                            {value}
+                        </Link>
+                    ) : (
+                        <Typography component="span" variant="body1">
+                            {value}
+                        </Typography>
+                    )}
+                </Box>
             </Box>
         );
     }

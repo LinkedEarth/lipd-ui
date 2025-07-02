@@ -17,4 +17,6 @@ export { default as PaleoDataTree } from './PaleoDataTree';
 export { default as PublicationsTree } from './PublicationsTree';
 export { default as SyncProgressBar } from './SyncProgressBar';
 export { default as TreeItem } from './TreeItem';
-export { LiPDApp } from './LiPDApp'; 
+export { LiPDApp } from './LiPDApp';
+export { default as Header } from './Header';
+export { default as SectionCard } from './SectionCard'; 

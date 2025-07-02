@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Box, List, ListItem, ListItemText, Divider, IconButton, Typography, Button, TextField } from '@mui/material';
+import { Box, List, ListItem, ListItemText, Divider, IconButton, Typography, Button, TextField, Link } from '@mui/material';
 import { EditIcon, DeleteIcon, AddIcon, CheckIcon } from './CustomIcons';
 import { useLiPDStore } from '../store';
 import { Schema, SchemaField } from '../schemas';
-import { Fieldset } from './Fieldset';
+import SectionCard from './SectionCard';
 import { formVariant } from '../utils/utils';
+import { Box as MuiBox } from '@mui/material';
 
 interface ListViewProps {
     title: string;
@@ -110,15 +111,33 @@ const ListView: React.FC<ListViewProps> = ({
 
     const content = (
         <>
-            <List dense={dense} sx={{ width: '100%', p: 0 }}>
+            <List
+                dense={dense}
+                sx={{
+                    width: '100%',
+                    p: 0,
+                    ...(readonly && {
+                        listStyleType: 'disc',
+                        pl: 2,
+                        '& .MuiListItem-root': {
+                            display: 'list-item',
+                            py: 0.25,
+                        },
+                    }),
+                }}
+            >
                 {(items || []).map((item, index) => {
                     // console.log(item);
                     // console.log(schema);
-                    let primary = schema?.label?.primary ? schema.label.primary(item) : "Item " + (index + 1);
+                    let primary = schema?.label?.primary ? schema.label.primary(item) : '';
                     let secondary = schema?.label?.secondary ? schema.label.secondary(item) : ""
 
                     if (!primary) {
-                        primary = "Unnamed"
+                        if (fieldSchema?.label) {
+                            primary = `${fieldSchema.label} ${index + 1}`;
+                        } else {
+                            primary = `Item ${index + 1}`;
+                        }
                     }
                     const isSimpleValue = typeof item !== 'object';
                     if (isSimpleValue) {
@@ -127,14 +146,16 @@ const ListView: React.FC<ListViewProps> = ({
                     
                     return (
                     <React.Fragment key={index}>
-                        {index > 0 && <Divider />}
+                        { !readonly && index > 0 && <Divider />}
                         <ListItem
                             onClick={() => isSimpleValue ? null : handleEdit(index)}
                             sx={{
                                 cursor: isSimpleValue ? 'default' : 'pointer',
-                                '&:hover': {
-                                    backgroundColor: 'action.hover',
-                                }
+                                ...(readonly && {
+                                    backgroundColor: 'transparent !important',
+                                    px: 0,
+                                }),
+                                '&:hover': readonly ? {} : { backgroundColor: 'action.hover' },
                             }}
                             secondaryAction={
                                 !readonly ? <Box sx={{ display: 'flex' }}>
@@ -185,16 +206,27 @@ const ListView: React.FC<ListViewProps> = ({
                                     }}
                                 />
                             ) : (
-                                <ListItemText
-                                    primaryTypographyProps={{
-                                        fontSize: dense ? '0.9rem' : '1.2rem'
-                                    }}
-                                    secondaryTypographyProps={{
-                                        fontSize: dense ? '0.8rem' : '0.9rem'
-                                    }}
-                                    primary={primary}
-                                    secondary={secondary}
-                                />
+                                readonly ? (
+                                    <Link
+                                        component="span"
+                                        underline="hover"
+                                        color="primary"
+                                        sx={{ fontSize: '1rem' }}
+                                    >
+                                        {primary}
+                                    </Link>
+                                ) : (
+                                    <ListItemText
+                                        primaryTypographyProps={{
+                                            fontSize: dense ? '1rem' : '1.1rem'
+                                        }}
+                                        secondaryTypographyProps={{
+                                            fontSize: dense ? '0.9rem' : '1rem'
+                                        }}
+                                        primary={primary}
+                                        secondary={secondary}
+                                    />
+                                )
                             )}
                         </ListItem>
                     </React.Fragment>
@@ -237,19 +269,38 @@ const ListView: React.FC<ListViewProps> = ({
     );
 
     if (useFieldset) {
+        // Readonly view: render plain list with subtitle label
+        if (readonly) {
+            return (
+                <MuiBox sx={{ mt: dense ? 0.5 : 1 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 0.5 }}>
+                        {title}
+                    </Typography>
+                    {content}
+                </MuiBox>
+            );
+        }
+
+        // Editable view: keep SectionCard with action button
         return (
-            <Fieldset dense={dense}>
-                <legend>
-                    {title}
-                    {!readonly && <Button
-                        onClick={handleAddNew}
-                        startIcon={<AddIcon />}
-                    >
-                        {addButtonText}
-                    </Button>}
-                </legend>
+            <SectionCard
+                dense={dense}
+                title={title}
+                action={
+                    !readonly && (
+                        <Button
+                            onClick={handleAddNew}
+                            startIcon={<AddIcon />}
+                            size="small"
+                            variant="text"
+                        >
+                            {addButtonText}
+                        </Button>
+                    )
+                }
+            >
                 {content}
-            </Fieldset>
+            </SectionCard>
         );
     }
 

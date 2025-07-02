@@ -107,26 +107,31 @@ export const NavigationPanel: React.FC = () => {
     };
 
     return (
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ p: 1, height: '100%' }}>
             <SimpleTreeView
                 aria-label="dataset navigation"
                 expandedItems={Array.from(expandedNodes)}
                 onExpandedItemsChange={handleNodeToggle}
                 onSelectedItemsChange={handleNodeSelect}
-                sx={{ height: '100%', flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}
+                sx={{
+                    height: '100%',
+                    flexGrow: 1,
+                    maxWidth: 400,
+                    overflowY: 'auto',
+                    '& .MuiTreeItem-content': {
+                        py: 0.2,
+                    },
+                    '& .MuiTreeItem-label': {
+                        fontSize: '0.75rem',
+                    },
+                }}
             >
                 <TreeItem itemId="dataset" label="Dataset">
-                    <TreeItem
-                        itemId="dataset.location"
-                        label="Location"
-                    />
+                    <TreeItem itemId="dataset.location" label="Location" />
                     {renderPaleoDataTree()}
                     {renderChronDataTree()}
                     {renderPublicationsTree()}
-                    <TreeItem
-                        itemId="dataset.changeLogs"
-                        label="ChangeLogs"
-                    />
+                    <TreeItem itemId="dataset.changeLogs" label="ChangeLogs" />
                 </TreeItem>
             </SimpleTreeView>
         </Box>

@@ -16,8 +16,10 @@ import { getPublicationTitleLabel, getPublicationAuthorsLabel,
   getChangeLogLabel,
   getChangeLogCuratorLabel,
   getChangeLogEntryLabel,
-  getCompilationNameLabel
- } from "./labels";
+  getCompilationNameLabel,
+  getInterpretationLabel,
+  getCalibrationLabel
+} from "./labels";
 
 // --- rest of file unchanged but truncated for brevity ---
 export interface Schema {
@@ -287,6 +289,9 @@ export const interpretationSchema: Schema = {
         schema: seasonalitySchema 
       }
   },
+  label: {
+    primary: getInterpretationLabel
+  },
   class: Interpretation
 };
 
@@ -306,6 +311,9 @@ export const calibrationSchema: Schema = {
       seasonality: { type: 'string', label: 'Seasonality' },
       targetDataset: { type: 'string', label: 'Target Dataset' },
       uncertainty: { type: 'string', label: 'Uncertainty' }
+  },
+  label: {
+    primary: getCalibrationLabel
   },
   class: Calibration
 };

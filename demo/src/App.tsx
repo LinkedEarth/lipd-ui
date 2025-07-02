@@ -126,12 +126,12 @@ const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+      <AppBar position="static" color="default" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Toolbar variant="dense" sx={{ minHeight: 48, px: 2 }}>
+          <Typography variant="subtitle1" component="div" sx={{ fontWeight: 600, flexGrow: 1 }}>
             LiPD UI Library Demo
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Chip 
               label={isReadonly ? 'Read-Only Mode' : 'Edit Mode'} 
               color={isReadonly ? 'secondary' : 'primary'} 
@@ -158,8 +158,8 @@ const App: React.FC = () => {
             />
             <Button
               component="label"
-              color="inherit"
               variant="outlined"
+              size="small"
             >
               Load LiPD
               <input
@@ -169,15 +169,15 @@ const App: React.FC = () => {
                 onChange={handleUploadLIPD}
               />
             </Button>
-            <Button color="inherit" variant="outlined" onClick={() => setUrlDialogOpen(true)}>
+            <Button variant="outlined" size="small" onClick={() => setUrlDialogOpen(true)}>
               Load from URL
             </Button>
-            <Button color="inherit" variant="outlined" onClick={() => setGraphDialogOpen(true)}>
+            <Button variant="outlined" size="small" onClick={() => setGraphDialogOpen(true)}>
               Load from GraphDB
             </Button>
             <Button
-              color="inherit"
               variant="outlined"
+              size="small"
               onClick={async () => {
                 if (!dataset) return;
                 try {
@@ -204,15 +204,15 @@ const App: React.FC = () => {
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth={false} sx={{ mt: 3, height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
+      <Container maxWidth={false} sx={{ mt: 2, height: 'calc(100vh - 48px)', display: 'flex', flexDirection: 'column' }}>
         <Grid container spacing={3}>
           <Grid item xs={12} sx={{ flex: 1, minHeight: 0 }}>
-            <Paper sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <Paper variant="outlined" sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column', borderRadius: 2 }}>
               <RouterProvider>
                 {dataset ? (
                   <LiPDApp />
                 ) : (
-                  <Box sx={{display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',height:'100%',textAlign:'center',gap:2}}>
+                  <Box sx={{display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',height:'100%',textAlign:'center',gap:2, p:4}}>
                     <Typography variant="h5">No dataset loaded</Typography>
                     <Typography variant="body1">Load a LiPD file, enter a URL, or fetch from GraphDB to get started.</Typography>
                     <Box sx={{display:'flex',gap:2}}>
