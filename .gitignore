@@ -1,0 +1,39 @@
+# --- Node & TypeScript ---
+node_modules/
+.npm/
+*.log
+
+# Build outputs
+/dist/
+/build/
+/.turbo/
+*.tsbuildinfo
+
+# Bundles / artifacts
+*.tgz
+*.zip
+*.jar
+
+# Testing & coverage
+/coverage/
+/.nyc_output/
+
+# IDE / editor configs
+.vscode/
+.idea/
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Environment & local config
+.env*
+*.local
+
+# Runtime data
+pids
+db.sqlite
+
+# Misc
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log* 
