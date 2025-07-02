@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2024-07-02
+
+### Added
+- Full visual refresh: modern header, navigation panel, SectionCard container, compact DataTable grid
+- Read-only mode improvements: aligned label/value pairs, enum chips, hyperlink lists with bullets
+- Responsive layout tweaks across LiPDApp and demo
+- Comprehensive `.gitignore` to avoid committing `node_modules` and build artefacts
+
+### Changed
+- Switched legacy `<fieldset>` containers to new `SectionCard` component
+- Reduced tree navigation font size and spacing, added dynamic labels for PaleoData/ChronData, Calibration, and Interpretation items
+- DataGrid now mimics spreadsheet look with dense rows and bold uppercase headers
+
+### Fixed
+- Correct labels for Interpretation, Calibration, PaleoData, ChronData lists
+- Consistent font sizes across components, especially in read-only views
+
+### Build
+- Bumped version to 0.4.0
+
 ## [0.3.0] - 2024-07-02
 
 ### Added
