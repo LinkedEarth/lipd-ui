@@ -118,7 +118,7 @@ export const DefaultEditor: React.FC<EditorProps> = ({
                     </Box>
                 ) : (
                     <SectionCard dense={dense} title={title || fieldSchema.label || fieldName}>
-                        {content}
+                    {content}
                     </SectionCard>
                 )
             ) : content;

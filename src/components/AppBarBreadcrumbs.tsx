@@ -28,19 +28,30 @@ const AppBarBreadcrumbs: React.FC = () => {
       <Breadcrumbs
         separator={<NavigateNextIcon fontSize="small" />}
         aria-label="breadcrumb"
-        sx={{ flexGrow: 1 }}
+        maxItems={3}
+        sx={{ 
+          flexGrow: 1,
+          '& .MuiBreadcrumbs-ol': {
+            flexWrap: 'nowrap'
+          }
+        }}
       >
         {breadcrumbs.map((crumb, index) => (
           <Typography
             key={crumb.path}
-            variant="body1"
+            variant="body2"
             color={index === breadcrumbs.length - 1 ? 'text.primary' : 'primary'}
             onClick={() => navigateTo(crumb.path)}
             sx={{ 
               cursor: 'pointer', 
               display: 'flex', 
               alignItems: 'center',
-              fontWeight: index === breadcrumbs.length - 1 ? 'bold' : 'normal'
+              fontWeight: index === breadcrumbs.length - 1 ? 'bold' : 'normal',
+              fontSize: '0.8rem',
+              maxWidth: { xs: '120px', sm: '200px', md: 'none' },
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
             }}
           >
             {index === 0 && <HomeIcon sx={{ mr: 0.5 }} fontSize="small" />}

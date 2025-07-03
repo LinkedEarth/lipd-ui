@@ -12,13 +12,7 @@ import {
   Switch, 
   FormControlLabel,
   Button,
-  Box,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField
+  Box
 } from '@mui/material';
 import { 
   LiPDApp, 
@@ -26,7 +20,7 @@ import {
   RouterProvider 
 } from '@linkedearth/lipd-ui';
 
-import { LiPD } from 'lipdjs';
+import { LiPD, Dataset } from 'lipdjs';
 import { Logger, LogLevel } from 'lipdjs';
 
 // Enable debug-level logging to see all CSV lookup details
@@ -35,13 +29,16 @@ logger.setLogLevel(LogLevel.DEBUG);
 
 import JSZip from 'jszip';
 
+// Simple menu icon component for demo
+const MenuIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+  </svg>
+);
+
 const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isReadonly, setIsReadonly] = useState(false);
-  const [urlDialogOpen, setUrlDialogOpen] = useState(false);
-  const [graphDialogOpen, setGraphDialogOpen] = useState(false);
-  const [urlInput, setUrlInput] = useState('');
-  const [graphInput, setGraphInput] = useState('');
   
   const { 
     setDataset, 
@@ -89,39 +86,7 @@ const App: React.FC = () => {
     }
   };
 
-  const handleLoadFromUrl = async () => {
-    if (!urlInput) return;
-    try {
-      const lipd = new LiPD();
-      await lipd.load(urlInput);
-      const loaded = await lipd.getDatasets();
-      if (loaded.length > 0) {
-        setDataset(loaded[0]);
-      }
-      setUrlDialogOpen(false);
-      setUrlInput('');
-    } catch (err) {
-      console.error('Failed to load LiPD URL', err);
-    }
-  };
 
-  const handleLoadFromGraph = async () => {
-    if (!graphInput) return;
-    try {
-      const lipd = new LiPD();
-      // Default endpoint – adjust if needed
-      lipd.setEndpoint('https://linkedearth.graphdb.mint.isi.edu/repositories/LiPDVerse-dynamic');
-      await lipd.loadRemoteDatasets(graphInput);
-      const loaded = await lipd.getDatasets();
-      if (loaded.length > 0) {
-        setDataset(loaded[0]);
-      }
-      setGraphDialogOpen(false);
-      setGraphInput('');
-    } catch (err) {
-      console.error('Failed to load LiPD from GraphDB', err);
-    }
-  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -129,39 +94,32 @@ const App: React.FC = () => {
       <AppBar position="static" color="default" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Toolbar variant="dense" sx={{ minHeight: 48, px: 2 }}>
           <Typography variant="subtitle1" component="div" sx={{ fontWeight: 600, flexGrow: 1 }}>
-            LiPD UI Library Demo
+            LiPD Editor
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Chip 
-              label={isReadonly ? 'Read-Only Mode' : 'Edit Mode'} 
-              color={isReadonly ? 'secondary' : 'primary'} 
-              variant="outlined" 
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isReadonly}
-                  onChange={(e) => setIsReadonly(e.target.checked)}
-                  color="secondary"
-                />
+          
+          {/* File operations */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Button variant="outlined" size="small" onClick={() => {
+              try {
+                // Create a new empty dataset with LiPD naming convention
+                const emptyDataset = new Dataset();
+                const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                const datasetName = `Unnamed-Site.Author.${new Date().getFullYear()}`;
+                emptyDataset.setName(datasetName);
+                emptyDataset.setDatasetId(`DS${timestamp}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`);
+                setDataset(emptyDataset);
+              } catch (err) {
+                console.error('Failed to create new dataset', err);
               }
-              label="Read-Only"
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isDarkMode}
-                  onChange={(e) => setIsDarkMode(e.target.checked)}
-                />
-              }
-              label="Dark Mode"
-            />
+            }}>
+              New
+            </Button>
             <Button
               component="label"
               variant="outlined"
               size="small"
             >
-              Load LiPD
+              Open
               <input
                 type="file"
                 hidden
@@ -169,24 +127,24 @@ const App: React.FC = () => {
                 onChange={handleUploadLIPD}
               />
             </Button>
-            <Button variant="outlined" size="small" onClick={() => setUrlDialogOpen(true)}>
-              Load from URL
-            </Button>
-            <Button variant="outlined" size="small" onClick={() => setGraphDialogOpen(true)}>
-              Load from GraphDB
-            </Button>
             <Button
               variant="outlined"
               size="small"
+              disabled={!dataset}
               onClick={async () => {
                 if (!dataset) return;
                 try {
-                  const lipdMod = await import('lipdjs');
-                  const lipd = new lipdMod.LiPD();
+                  // Fix the internal ID to follow LiPD convention: http://linked.earth/lipd/[dsname]
+                  const datasetName = dataset.getName?.() || 'dataset';
+                  const correctInternalId = `http://linked.earth/lipd/${datasetName}`;
+                  
+                  // Set the correct internal ID
+                  (dataset as any)._id = correctInternalId;
+                  
+                  const lipd = new LiPD();
                   lipd.loadDatasets([dataset]);
-                  // Use browser-safe creator (assumes lipdjs >= 0.2.7)
-                  const dsName = dataset.getName?.() || 'dataset';
-                  const blob: Blob = await (lipd as any).createLipdBrowser(dsName);
+                  
+                  const blob: Blob = await (lipd as any).createLipdBrowser(datasetName);
                   const url = URL.createObjectURL(blob);
                   const link = document.createElement('a');
                   link.href = url;
@@ -198,8 +156,45 @@ const App: React.FC = () => {
                 }
               }}
             >
-              Download LiPD
+              Save
             </Button>
+          </Box>
+
+          {/* Settings toggles - compact */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 0.5, 
+            ml: 2,
+            '& .MuiFormControlLabel-root': {
+              mr: 0.5,
+            },
+            '& .MuiFormControlLabel-label': {
+              fontSize: '0.75rem',
+              display: { xs: 'none', sm: 'block' }
+            }
+          }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  size="small"
+                  checked={isReadonly}
+                  onChange={(e) => setIsReadonly(e.target.checked)}
+                  color="secondary"
+                />
+              }
+              label="Read-Only"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  size="small"
+                  checked={isDarkMode}
+                  onChange={(e) => setIsDarkMode(e.target.checked)}
+                />
+              }
+              label="Dark"
+            />
           </Box>
         </Toolbar>
       </AppBar>
@@ -214,15 +209,11 @@ const App: React.FC = () => {
                 ) : (
                   <Box sx={{display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',height:'100%',textAlign:'center',gap:2, p:4}}>
                     <Typography variant="h5">No dataset loaded</Typography>
-                    <Typography variant="body1">Load a LiPD file, enter a URL, or fetch from GraphDB to get started.</Typography>
-                    <Box sx={{display:'flex',gap:2}}>
-                      <Button component="label" variant="contained">
-                        Choose File
-                        <input type="file" hidden accept=".lpd" onChange={handleUploadLIPD} />
-                      </Button>
-                      <Button variant="contained" onClick={()=>setUrlDialogOpen(true)}>From URL</Button>
-                      <Button variant="contained" onClick={()=>setGraphDialogOpen(true)}>From GraphDB</Button>
-                    </Box>
+                    <Typography variant="body1">Click "Open" in the toolbar or choose a file below to get started.</Typography>
+                    <Button component="label" variant="contained">
+                      Choose LiPD File
+                      <input type="file" hidden accept=".lpd" onChange={handleUploadLIPD} />
+                    </Button>
                   </Box>
                 )}
               </RouterProvider>
@@ -231,29 +222,7 @@ const App: React.FC = () => {
         </Grid>
       </Container>
 
-      {/* URL Dialog */}
-      <Dialog open={urlDialogOpen} onClose={()=>setUrlDialogOpen(false)}>
-        <DialogTitle>Load LiPD from URL</DialogTitle>
-        <DialogContent>
-          <TextField autoFocus margin="dense" label="URL" fullWidth value={urlInput} onChange={e=>setUrlInput(e.target.value)} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={()=>setUrlDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleLoadFromUrl} variant="contained">Load</Button>
-        </DialogActions>
-      </Dialog>
 
-      {/* GraphDB Dialog */}
-      <Dialog open={graphDialogOpen} onClose={()=>setGraphDialogOpen(false)}>
-        <DialogTitle>Load LiPD from GraphDB</DialogTitle>
-        <DialogContent>
-          <TextField autoFocus margin="dense" label="Dataset Name" fullWidth value={graphInput} onChange={e=>setGraphInput(e.target.value)} helperText="Enter dataset name, e.g., Ocn-MadangLagoonPapuaNewGuinea.Kuhnert.2001" />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={()=>setGraphDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleLoadFromGraph} variant="contained">Load</Button>
-        </DialogActions>
-      </Dialog>
     </ThemeProvider>
   );
 };

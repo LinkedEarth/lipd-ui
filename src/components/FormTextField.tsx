@@ -64,15 +64,15 @@ export const FormTextField = React.memo(({
                     {label}
                 </Typography>
                 <Box sx={{ flex: 1 }}>
-                    {typeof value === 'string' && value.match(/^https?:\/\//) ? (
+                {typeof value === 'string' && value.match(/^https?:\/\//) ? (
                         <Link href={value} target="_blank" rel="noopener noreferrer" underline="hover" sx={{ fontSize: '1rem' }}>
                             {value}
                         </Link>
-                    ) : (
+                ) : (
                         <Typography component="span" variant="body1">
                             {value}
                         </Typography>
-                    )}
+                )}
                 </Box>
             </Box>
         );

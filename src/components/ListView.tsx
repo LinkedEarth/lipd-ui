@@ -269,14 +269,27 @@ const ListView: React.FC<ListViewProps> = ({
     );
 
     if (useFieldset) {
-        // Readonly view: render plain list with subtitle label
+        // Readonly view: align with other readonly fields (label left, content right)
         if (readonly) {
             return (
-                <MuiBox sx={{ mt: dense ? 0.5 : 1 }}>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 0.5 }}>
+                <MuiBox
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        py: 0.5,
+                        columnGap: 1,
+                    }}
+                >
+                    <Typography
+                        variant="subtitle2"
+                        color="text.secondary"
+                        sx={{ flexBasis: { xs: '35%', sm: '25%', md: '20%' }, flexShrink: 0, fontWeight: 500 }}
+                    >
                         {title}
                     </Typography>
-                    {content}
+                    <MuiBox sx={{ flex: 1 }}>
+                        {content}
+                    </MuiBox>
                 </MuiBox>
             );
         }

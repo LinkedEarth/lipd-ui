@@ -333,6 +333,14 @@ export const compilationSchema: Schema = {
   fields: {
       name: { type: 'string', label: 'Name' },
       version: { type: 'string', label: 'Version' },
+      versions: {
+        type: 'array',
+        label: 'Versions',
+        items: {
+          type: 'string',
+          label: 'Version'
+        }
+      },
   },
   label: {
     primary: getCompilationNameLabel

@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.1] - 2025-01-03
+
+### Fixed
+- **Critical Save Bug**: Fixed save functionality failing when dataset name is changed
+  - Dataset internal ID now correctly follows LiPD convention: `http://linked.earth/lipd/[dataset-name]`
+  - Save operation now properly updates internal identifier before exporting
+  - Resolved issue where `createLipdBrowser` couldn't find dataset after name changes
+  - Added debug logging to help troubleshoot export issues
+- **Demo App Improvements**: Enhanced demo app save button with proper error handling
+
+### Technical Details
+- Fixed dataset internal ID synchronization with LiPD graph indexing
+- Ensured consistent identifier format across dataset creation and export workflows
+- Improved error reporting in save operations
+
 ## [0.4.0] - 2024-07-02
 
 ### Added

@@ -21,6 +21,7 @@ export const useLiPDStore = create<AppState>((set, get) => ({
   selectedNode: null,
   expandedNodes: new Set(['dataset']),
   rightPanelOpen: true,
+  navPanelOpen: true,
   selectedTab: 0,
   themeMode: 'light',
   validationErrors: {},
@@ -60,6 +61,7 @@ export const useLiPDStore = create<AppState>((set, get) => ({
     return Promise.resolve();
   },
   toggleRightPanel:()=>set({rightPanelOpen:!get().rightPanelOpen}),
+  toggleNavPanel:()=>set({navPanelOpen:!get().navPanelOpen}),
   setSelectedTab:(t)=>set({selectedTab:t}),
   updateDataset: (field, value) => {
     const original = get().dataset as Dataset | null;
@@ -134,5 +136,6 @@ export const useLiPDStore = create<AppState>((set, get) => ({
   setExpandedNodes:(nodes)=>set({expandedNodes:nodes}),
   setIsRemote:(b)=>set({isRemote:b}),
   setDatasetName:(n)=>set({datasetName:n}),
-  setReadonly:(readonly:boolean)=>set({readonly})
+  setReadonly:(readonly:boolean)=>set({readonly}),
+  setNavPanelOpen:(open:boolean)=>set({navPanelOpen:open})
 })); 

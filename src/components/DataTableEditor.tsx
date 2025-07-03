@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Paper, Typography, Grid, TextField, IconButton, Button } from '@mui/material';
+import { Box, Paper, Typography, Grid, TextField, IconButton, Button, Link } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -11,11 +11,12 @@ import { AddIcon, FileUploadIcon, FileDownloadIcon, DeleteIcon } from './CustomI
 import ListView from './ListView';
 import { variableSchema } from '../schemas';
 import { formVariant, getValueFromPath } from '../utils/utils';
-import { EditorProps } from '../router';
+import { EditorProps, useRouter } from '../router';
 import { FormTextField } from './FormTextField';
 
 export const DataTableEditor: React.FC<EditorProps> = ({ path, params, onUpdate, title = '', readonly = false }) => {
     const dataset = useLiPDStore((state: any) => state.dataset);
+    const { navigateTo } = useRouter();
     
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(25);
@@ -148,7 +149,32 @@ export const DataTableEditor: React.FC<EditorProps> = ({ path, params, onUpdate,
             headerName: column.getName(),
             flex: 1,
             minWidth: 150,
-            editable: !readonly
+            editable: !readonly,
+            align: 'left',
+            headerAlign: 'left',
+            renderHeader: () => (
+                <Link
+                    component="button"
+                    variant="body2"
+                    onClick={() => {
+                        const variablePath = `${selectedNode}.variables.${colIndex}`;
+                        navigateTo(variablePath);
+                    }}
+                    sx={{
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        fontSize: '0.75rem',
+                        color: 'inherit',
+                        textDecoration: 'none',
+                        '&:hover': {
+                            textDecoration: 'underline',
+                            color: 'primary.main'
+                        }
+                    }}
+                >
+                    {column.getName() || `Variable ${colIndex + 1}`}
+                </Link>
+            )
         })),
         ...(readonly ? [] : [{
             field: 'actions',
@@ -225,8 +251,8 @@ export const DataTableEditor: React.FC<EditorProps> = ({ path, params, onUpdate,
                 </Box>}
             </Box>
 
-            <Grid container spacing={2} sx={{ mb: 2 }}>
-                <Grid item xs={12} sm={6}>
+            <Box sx={{ mb: 2 }}>
+                <Box sx={{ mb: 2 }}>
                     <FormTextField
                         key={`${path}.fileName`}
                         label="File Name"
@@ -237,20 +263,18 @@ export const DataTableEditor: React.FC<EditorProps> = ({ path, params, onUpdate,
                         }}
                         disabled={readonly}
                     />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                    <FormTextField
-                        key={`${path}.missingValue`}
-                        label="Missing Value"
-                        defaultValue={table.getMissingValue() || ''}
-                        onBlur={(value) => {
-                            table.setMissingValue(value);
-                            onUpdate(path, table);
-                        }}
-                        disabled={readonly}
-                    />
-                </Grid>
-            </Grid>
+                </Box>
+                <FormTextField
+                    key={`${path}.missingValue`}
+                    label="Missing Value"
+                    defaultValue={table.getMissingValue() || ''}
+                    onBlur={(value) => {
+                        table.setMissingValue(value);
+                        onUpdate(path, table);
+                    }}
+                    disabled={readonly}
+                />
+            </Box>
 
             <Box sx={{ height: 500, width: '100%', mb: 2 }}>
                 <DataGrid

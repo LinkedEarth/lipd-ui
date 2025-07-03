@@ -1,17 +1,28 @@
 import React from 'react';
-import { Box, CircularProgress } from '@mui/material';
+import { Box, CircularProgress, IconButton, useTheme, useMediaQuery } from '@mui/material';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import { Dataset } from 'lipdjs';
 import { useLiPDStore } from '../store';
 
+// Close icon component
+const CloseIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+  </svg>
+);
+
 export const NavigationPanel: React.FC = () => {
-    const { dataset, expandedNodes, setExpandedNodes, setSelectedNode } = useLiPDStore((state: any) => ({
+    const { dataset, expandedNodes, setExpandedNodes, setSelectedNode, setNavPanelOpen } = useLiPDStore((state: any) => ({
         dataset: state.dataset,
         expandedNodes: state.expandedNodes,
         setExpandedNodes: state.setExpandedNodes,
-        setSelectedNode: state.setSelectedNode
+        setSelectedNode: state.setSelectedNode,
+        setNavPanelOpen: state.setNavPanelOpen
     }));
+    
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     
     if (!dataset) {
         return (
@@ -107,8 +118,28 @@ export const NavigationPanel: React.FC = () => {
     };
 
     return (
-        <Box sx={{ p: 1, height: '100%' }}>
-            <SimpleTreeView
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            {/* Mobile close button */}
+            {isMobile && (
+                <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'flex-end', 
+                    p: 1, 
+                    borderBottom: 1, 
+                    borderColor: 'divider' 
+                }}>
+                    <IconButton
+                        size="small"
+                        onClick={() => setNavPanelOpen(false)}
+                        aria-label="Close navigation"
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </Box>
+            )}
+            
+            <Box sx={{ p: 1, flex: 1, overflow: 'hidden' }}>
+                <SimpleTreeView
                 aria-label="dataset navigation"
                 expandedItems={Array.from(expandedNodes)}
                 onExpandedItemsChange={handleNodeToggle}
@@ -134,6 +165,7 @@ export const NavigationPanel: React.FC = () => {
                     <TreeItem itemId="dataset.changeLogs" label="ChangeLogs" />
                 </TreeItem>
             </SimpleTreeView>
+            </Box>
         </Box>
     );
 }; 

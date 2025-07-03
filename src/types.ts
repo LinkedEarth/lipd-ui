@@ -23,6 +23,7 @@ export interface AppState {
   selectedNode: string | null;
   expandedNodes: Set<string>;
   rightPanelOpen: boolean;
+  navPanelOpen: boolean;
   selectedTab: number;
   themeMode: ThemeMode;
   validationErrors: Record<string, any>;
@@ -32,6 +33,9 @@ export interface AppState {
   syncConfirmDialogOpen: boolean;
   // actions same as original but optional for generic usage
   [key: string]: any;
+  toggleRightPanel: () => void;
+  toggleNavPanel: () => void;
+  setNavPanelOpen: (open: boolean) => void;
 }
 
 export interface Model {
