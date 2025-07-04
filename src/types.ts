@@ -34,6 +34,8 @@ export interface AppState {
   toggleRightPanel: () => void;
   toggleNavPanel: () => void;
   setNavPanelOpen: (open: boolean) => void;
+  setError: (error: string) => void;
+  setSuccess: (message: string) => void;
 }
 
 export interface Model {

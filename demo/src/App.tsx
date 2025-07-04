@@ -12,7 +12,9 @@ import {
   Switch, 
   FormControlLabel,
   Box,
-  CircularProgress
+  CircularProgress,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import { 
   LiPDApp, 
@@ -42,13 +44,15 @@ const App: React.FC = () => {
     setReadonly,
     dataset,
     isLoading,
-    loadingMessage 
+    loadingMessage,
+    notification
   } = useLiPDStore(state => ({
     setThemeMode: state.setThemeMode,
     setReadonly: state.setReadonly,
     dataset: state.dataset,
     isLoading: state.isLoading,
-    loadingMessage: state.loadingMessage
+    loadingMessage: state.loadingMessage,
+    notification: state.notification
   }));
 
   // Create theme
@@ -67,6 +71,12 @@ const App: React.FC = () => {
   React.useEffect(() => {
     setReadonly(isReadonly);
   }, [isReadonly, setReadonly]);
+
+  // Handle notification close
+  const handleNotificationClose = () => {
+    // Clear notification from store
+    useLiPDStore.setState({ notification: null });
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -152,6 +162,23 @@ const App: React.FC = () => {
 
       {/* Sync Progress Bar - shown when syncing */}
       <SyncProgressBar />
+
+      {/* Notification Snackbar */}
+      <Snackbar
+        open={Boolean(notification)}
+        autoHideDuration={notification?.type === 'error' ? 8000 : 4000}
+        onClose={handleNotificationClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleNotificationClose}
+          severity={notification?.type === 'error' ? 'error' : notification?.type === 'success' ? 'success' : 'info'}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {notification?.message}
+        </Alert>
+      </Snackbar>
     </ThemeProvider>
   );
 };

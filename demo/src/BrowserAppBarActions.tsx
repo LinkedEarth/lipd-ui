@@ -29,11 +29,13 @@ const BrowserAppBarActions: React.FC = () => {
   const [remoteDialogOpen, setRemoteDialogOpen] = useState(false);
   const [remoteDialogMode, setRemoteDialogMode] = useState<'open' | 'save'>('open');
   
-  const { dataset, setDataset, setIsLoading, setLoadingMessage } = useLiPDStore(state => ({
+  const { dataset, setDataset, setIsLoading, setLoadingMessage, setError, setSuccess } = useLiPDStore(state => ({
     dataset: state.dataset,
     setDataset: state.setDataset,
     setIsLoading: state.setIsLoading,
-    setLoadingMessage: state.setLoadingMessage
+    setLoadingMessage: state.setLoadingMessage,
+    setError: state.setError,
+    setSuccess: state.setSuccess
   }));
 
   // Initialize LiPD actions with progress handlers that update store state
@@ -42,13 +44,16 @@ const BrowserAppBarActions: React.FC = () => {
       console.log(message);
       setLoadingMessage(message);
     },
-    onError: (error) => {
+    onError: (error: string) => {
       console.error(error);
-      // Don't automatically clear loading state here - let the specific handlers do it
+      // Show error to user via notification system
+      setError(error);
+      setIsLoading(false);
     },
     onSuccess: (message) => {
       console.log(message);
-      // Don't automatically clear loading state here - let the specific handlers do it
+      // Show success message to user
+      setSuccess(message);
     }
   });
 
@@ -58,9 +63,11 @@ const BrowserAppBarActions: React.FC = () => {
       setIsLoading(true);
       const newDataset = await lipdActions.createNewLiPD();
       setDataset(newDataset);
-      setIsLoading(false); // Clear loading state after successful dataset creation
+      setIsLoading(false);
+      setSuccess('New dataset created successfully');
     } catch (error) {
       console.error('Failed to create new dataset:', error);
+      setError(`Failed to create new dataset: ${error instanceof Error ? error.message : String(error)}`);
       setIsLoading(false);
     }
   };
@@ -78,9 +85,11 @@ const BrowserAppBarActions: React.FC = () => {
           setIsLoading(true);
           const loadedDataset = await lipdActions.openLocalLiPD(file);
           setDataset(loadedDataset);
-          setIsLoading(false); // Clear loading state after successful file load
+          setIsLoading(false);
+          setSuccess(`Dataset "${file.name}" loaded successfully`);
         } catch (error) {
           console.error('Failed to open local file:', error);
+          setError(`Failed to open local file: ${error instanceof Error ? error.message : String(error)}`);
           setIsLoading(false);
         }
       }
@@ -102,8 +111,10 @@ const BrowserAppBarActions: React.FC = () => {
     
     try {
       await lipdActions.downloadLiPD(dataset);
+      setSuccess('Dataset downloaded successfully');
     } catch (error) {
       console.error('Failed to save local file:', error);
+      setError(`Failed to save local file: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -121,13 +132,16 @@ const BrowserAppBarActions: React.FC = () => {
       if (remoteDialogMode === 'open' && datasetName) {
         const loadedDataset = await lipdActions.openRemoteLiPD(datasetName, options);
         setDataset(loadedDataset);
-        setIsLoading(false); // Clear loading state after successful remote load
+        setIsLoading(false);
+        setSuccess(`Dataset "${datasetName}" loaded from GraphDB successfully`);
       } else if (remoteDialogMode === 'save' && dataset) {
         await lipdActions.saveRemoteLiPD(dataset, options);
-        setIsLoading(false); // Clear loading state after successful remote save
+        setIsLoading(false);
+        setSuccess(`Dataset "${dataset.getName?.() || 'Unknown'}" saved to GraphDB successfully`);
       }
     } catch (error) {
       console.error('Remote operation failed:', error);
+      setError(`Remote operation failed: ${error instanceof Error ? error.message : String(error)}`);
       setIsLoading(false);
     }
   };

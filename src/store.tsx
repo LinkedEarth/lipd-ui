@@ -73,6 +73,7 @@ export const useLiPDStore = create<AppState>((set, get) => ({
     set({ expandedNodes: ns });
   },
   setError: (e) => set({ validationErrors: { error: e }, notification: { type: 'error', message: e } }),
+  setSuccess: (message) => set({ notification: { type: 'success', message } }),
   setSaveComplete: (s, err) => set({ 
     isSaving: false, 
     notification: s ? { type: 'success', message: 'Dataset saved successfully' } : { type: 'error', message: err || 'Failed to save dataset' } 

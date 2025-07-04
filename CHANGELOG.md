@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.1] - 2025-01-04
+
+### 🐛 Bug Fixes
+- **Error Notifications**: Fixed missing error notifications in demo application
+- **User Feedback**: Added comprehensive error and success notifications for all file operations
+- **TypeScript Errors**: Resolved type errors in error handling callbacks
+- **Loading States**: Improved loading state management with proper error cleanup
+
+### ✨ Enhancements
+- **Notification System**: Added Snackbar notifications for better user experience
+- **Error Messages**: More descriptive error messages with operation context
+- **Success Feedback**: Success notifications for all successful operations
+- **Demo UX**: Enhanced demo with visual feedback for all user actions
+
+### 📦 Technical
+- Added `setSuccess` method to store for success notifications
+- Improved error handling in `BrowserAppBarActions` component
+- Better TypeScript typing for error callbacks
+- Consistent notification display across all environments
+
+---
+
 ## [0.5.0] - 2025-01-04
 
 ### 🚀 Major Features
