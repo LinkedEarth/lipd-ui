@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.2] - 2025-01-04
+
+### 📦 Dependencies
+- **lipdjs**: Updated from `^0.4.0` to `^0.4.1`
+  - Includes latest improvements and bug fixes from lipdjs
+  - Enhanced compatibility and performance optimizations
+  - Updated in both main package and demo dependencies
+
+### 🔧 Maintenance
+- Synchronized dependency versions across all packages
+- Ensured compatibility with latest lipdjs features
+
+---
+
 ## [0.5.1] - 2025-01-04
 
 ### 🐛 Bug Fixes
