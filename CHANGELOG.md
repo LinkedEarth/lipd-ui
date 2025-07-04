@@ -2,20 +2,50 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.4.1] - 2025-01-03
+## [0.5.0] - 2025-01-04
 
-### Fixed
-- **Critical Save Bug**: Fixed save functionality failing when dataset name is changed
-  - Dataset internal ID now correctly follows LiPD convention: `http://linked.earth/lipd/[dataset-name]`
-  - Save operation now properly updates internal identifier before exporting
-  - Resolved issue where `createLipdBrowser` couldn't find dataset after name changes
-  - Added debug logging to help troubleshoot export issues
-- **Demo App Improvements**: Enhanced demo app save button with proper error handling
+### 🚀 Major Features
+- **Environment-Agnostic Architecture**: Complete separation of VS Code dependencies from core library
+- **Flexible AppBarActions**: Configurable toolbar actions that adapt to different environments
+- **Enhanced GraphDB Integration**: Full CORS support for authenticated save/load operations
+- **Improved Loading Experience**: Comprehensive loading indicators across all environments
 
-### Technical Details
-- Fixed dataset internal ID synchronization with LiPD graph indexing
-- Ensured consistent identifier format across dataset creation and export workflows
-- Improved error reporting in save operations
+### ✨ New Features
+- **LiPDActions Class**: Unified action system for file operations across all environments
+- **Callback System**: `setLiPDStoreCallbacks()` for environment-specific integrations
+- **Dataset Name Sanitization**: Automatic sanitization using lipdjs internal logic
+- **Remote Dialog Enhancements**: Graph existence checking with visual feedback
+- **Buffer Polyfill**: Browser compatibility for Node.js dependencies
+
+### 🔧 Improvements
+- **VS Code Extension**: Async dataset loading with immediate loading screens
+- **Browser Demo**: Complete file operations with GraphDB connectivity
+- **Type Safety**: Enhanced TypeScript support with proper exports
+- **Build System**: Optimized for multiple target environments
+
+### 🐛 Bug Fixes
+- **CORS Issues**: Resolved all cross-origin request blocking
+- **Loading States**: Fixed missing loading indicators in all environments
+- **Dataset URIs**: Consistent graph URI generation across save/load operations
+- **Character Encoding**: Proper handling of special characters in dataset names
+- **Component Exports**: Fixed export/import issues across components
+
+### 🔄 Breaking Changes
+- **AppBarActions Configuration**: Apps now need to configure `headerProps` for `LiPDApp`
+- **Store Callbacks**: Extensions must implement `setLiPDStoreCallbacks()` for functionality
+- **VS Code Integration**: Extensions need to use new callback-based architecture
+
+### 📦 Dependencies
+- Added `buffer` polyfill for browser compatibility
+- Updated GraphDB CORS headers for compression support
+- Enhanced Vite configuration for Node.js polyfills
+
+### 🗂️ Examples
+- Updated browser implementation examples
+- Added VS Code extension integration examples  
+- Comprehensive environment setup documentation
+
+---
 
 ## [0.4.0] - 2024-07-02
 

@@ -1,7 +1,5 @@
 import { Dataset } from "lipdjs";
 
-export type VSCodeMessage = any; // left generic for library consumers
-
 export interface Notification {
   type: 'success' | 'error' | 'info' | 'warning';
   message: string;

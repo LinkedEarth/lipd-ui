@@ -11,10 +11,20 @@ const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN || 'pk.eyJ1IjoidmFydW5yYXRuYWthciI
 
 const LocationEditor: React.FC<EditorProps> = ({ dataset, path, params, onUpdate, title = '', readonly = false }) => {
     const location = getValueFromPath(dataset, path);
+    
+    // Handle case where location object doesn't exist yet
+    if (!location) {
+        return (
+            <Box sx={{ mt: 1, p: 2, textAlign: 'center', color: 'text.secondary' }}>
+                Location data not available
+            </Box>
+        );
+    }
+    
     // Track location coordinates to detect changes
     const [coordinates, setCoordinates] = useState({
-        lat: parseFloat(location.latitude || '0') || 0,
-        lng: parseFloat(location.longitude || '0') || 0
+        lat: parseFloat(location?.latitude || '0') || 0,
+        lng: parseFloat(location?.longitude || '0') || 0
     });
     
     const mapContainer = useRef<HTMLDivElement>(null);
@@ -23,12 +33,12 @@ const LocationEditor: React.FC<EditorProps> = ({ dataset, path, params, onUpdate
 
     // Initialize map and marker
     useEffect(() => {
-        if (!mapContainer.current || map.current) return;
+        if (!mapContainer.current || map.current || !location) return;
 
         mapboxgl.accessToken = MAPBOX_TOKEN;
         
-        const initialLat = parseFloat(location.latitude || '0') || 0;
-        const initialLng = parseFloat(location.longitude || '0') || 0;
+        const initialLat = parseFloat(location?.latitude || '0') || 0;
+        const initialLng = parseFloat(location?.longitude || '0') || 0;
 
         map.current = new mapboxgl.Map({
             container: mapContainer.current,
@@ -69,7 +79,7 @@ const LocationEditor: React.FC<EditorProps> = ({ dataset, path, params, onUpdate
         if (!readonly) {
             marker.current.on('dragend', () => {
                 const position = marker.current?.getLngLat();
-                if (position) {
+                if (position && location) {
                     location.latitude = position.lat.toFixed(6);
                     location.longitude = position.lng.toFixed(6);
                     
@@ -89,12 +99,14 @@ const LocationEditor: React.FC<EditorProps> = ({ dataset, path, params, onUpdate
             map.current?.remove();
             map.current = null;
         };
-    }, []);
+    }, [location]); // Add location as dependency
 
     // Monitor location changes from outside the component
     useEffect(() => {
-        const currentLat = parseFloat(location.latitude || '0') || 0;
-        const currentLng = parseFloat(location.longitude || '0') || 0;
+        if (!location) return;
+        
+        const currentLat = parseFloat(location?.latitude || '0') || 0;
+        const currentLng = parseFloat(location?.longitude || '0') || 0;
         
         // Only update if coordinates have changed from what we already know
         if (currentLat !== coordinates.lat || currentLng !== coordinates.lng) {
@@ -113,7 +125,7 @@ const LocationEditor: React.FC<EditorProps> = ({ dataset, path, params, onUpdate
                 });
             }
         }
-    }, [location.latitude, location.longitude]);
+    }, [location?.latitude, location?.longitude, coordinates]);
 
     return (
         <Box

@@ -12,6 +12,20 @@ export default defineConfig({
     global: 'globalThis',
     'process.env': {}
   },
+  resolve: {
+    alias: {
+      buffer: 'buffer',
+    },
+    dedupe: [
+      'react',
+      'react-dom',
+      '@emotion/react',
+      '@emotion/styled',
+      '@mui/material',
+      '@mui/system',
+      '@mui/styled-engine'
+    ]
+  },
   optimizeDeps: {
     include: [
       'react', 
@@ -23,18 +37,8 @@ export default defineConfig({
       '@emotion/react',
       '@emotion/styled',
       '@mui/system',
-      '@mui/styled-engine'
-    ]
-  },
-  resolve: {
-    dedupe: [
-      'react',
-      'react-dom',
-      '@emotion/react',
-      '@emotion/styled',
-      '@mui/material',
-      '@mui/system',
-      '@mui/styled-engine'
+      '@mui/styled-engine',
+      'buffer'
     ]
   },
   css: {

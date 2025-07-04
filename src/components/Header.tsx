@@ -1,15 +1,30 @@
 import React from 'react';
 import { AppBar, Toolbar, IconButton } from '@mui/material';
 import AppBarBreadcrumbs from './AppBarBreadcrumbs';
+import AppBarActions, { AppBarActionsProps } from './AppBarActions';
 import { MenuIcon } from './CustomIcons';
 import { useLiPDStore } from '../store';
-// import AppBarActions from './AppBarActions';
+
+export interface HeaderProps {
+  /**
+   * Props to pass to the AppBarActions component
+   */
+  appBarActionsProps?: AppBarActionsProps;
+  
+  /**
+   * Whether to show the AppBarActions component at all
+   */
+  showAppBarActions?: boolean;
+}
 
 /**
  * Header component – provides a minimal, professional application bar
  * with breadcrumbs and action icons.
  */
-const Header: React.FC = () => {
+const Header: React.FC<HeaderProps> = ({ 
+  appBarActionsProps = {}, 
+  showAppBarActions = true 
+}) => {
   const toggleNavPanel = useLiPDStore(state => state.toggleNavPanel);
 
   return (
@@ -29,7 +44,8 @@ const Header: React.FC = () => {
         {/* Breadcrumb navigation fills remaining space */}
         <AppBarBreadcrumbs />
 
-        {/* You can re-enable action icons by adding <AppBarActions /> here */}
+        {/* Action icons */}
+        {showAppBarActions && <AppBarActions {...appBarActionsProps} />}
       </Toolbar>
     </AppBar>
   );

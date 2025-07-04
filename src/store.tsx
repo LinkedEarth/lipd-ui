@@ -1,12 +1,28 @@
-// Copied generic store from webview (unchanged)
+// Environment-agnostic store for LiPD UI
 import React from 'react';
 import { create } from 'zustand';
 import { Dataset } from 'lipdjs';
 import { AppState, ThemeMode } from './types';
-import { getVSCodeAPI } from './vscode';
 import { getSchemaForPath } from './schemas';
 
-const vscode = getVSCodeAPI();
+// Interface for environment-specific callbacks
+export interface LiPDStoreCallbacks {
+  onUndo?: () => void;
+  onRedo?: () => void;
+  onSave?: () => void;
+  onSaveAs?: () => void;
+  onSync?: () => void;
+  onDatasetUpdated?: (dataset: Dataset) => void;
+  onReady?: () => void;
+}
+
+// Store for callbacks - can be set by the environment
+let storeCallbacks: LiPDStoreCallbacks = {};
+
+// Function to set environment-specific callbacks
+export const setLiPDStoreCallbacks = (callbacks: LiPDStoreCallbacks) => {
+  storeCallbacks = { ...storeCallbacks, ...callbacks };
+};
 
 export const useLiPDStore = create<AppState>((set, get) => ({
   dataset: null,
@@ -29,43 +45,76 @@ export const useLiPDStore = create<AppState>((set, get) => ({
   notification: null,
   readonly: false,
   syncConfirmDialogOpen: false,
-  initialize: () => {},
-  setIsLoading: (v:boolean)=>set({isLoading:v}),
-  setLoadingMessage:(m:string)=>set({loadingMessage:m}),
-  setThemeMode:(mode:ThemeMode)=>set({themeMode:mode}),
-  setDataset:(d)=>set({dataset:d,selectedNode:'dataset'}),
-  setDatasetSilently:(d)=>set({dataset:d}),
-  undo:()=>vscode.postMessage?.({type:'executeCommand',command:'lipd-vscode.undo'}),
-  redo:()=>vscode.postMessage?.({type:'executeCommand',command:'lipd-vscode.redo'}),
-  setUndoRedoState:(u:boolean,r:boolean)=>set({canUndo:u,canRedo:r}),
-  setSelectedNode:(n)=>set({selectedNode:n}),
-  toggleExpandNode:(id)=>{
-    const s=get().expandedNodes;const ns=new Set(s);ns.has(id)?ns.delete(id):ns.add(id);set({expandedNodes:ns});},
-  setError:(e)=>set({validationErrors:{error:e},notification:{type:'error',message:e}}),
-  setSaveComplete:(s,err)=>set({isSaving:false,notification:s?{type:'success',message:'Dataset saved successfully'}:{type:'error',message:err||'Failed to save dataset'}}),
-  setSyncComplete:(s,err)=>set({isSyncing:false,syncProgress:0,notification:s?{type:'success',message:'Dataset synced'}:{type:'error',message:err||'Failed to sync'}}),
-  setValidationResults:(res)=>set({validationErrors:res.errors||{},validationWarnings:res.warnings||{}}),
-  saveDataset:()=>{set({isSaving:true});vscode.postMessage?.({type:'save'});return Promise.resolve();},
-  saveDatasetAs:()=>{set({isSaving:true});vscode.postMessage?.({type:'executeCommand',command:'workbench.action.files.saveAs'});return Promise.resolve();},
-  syncDataset:()=>{
+  
+  // Environment-agnostic actions
+  initialize: () => {
+    storeCallbacks.onReady?.();
+  },
+  setIsLoading: (v: boolean) => set({ isLoading: v }),
+  setLoadingMessage: (m: string) => set({ loadingMessage: m }),
+  setThemeMode: (mode: ThemeMode) => set({ themeMode: mode }),
+  setDataset: (d) => set({ dataset: d, selectedNode: 'dataset' }),
+  setDatasetSilently: (d) => set({ dataset: d }),
+  
+  // These actions now use callbacks instead of direct VS Code API calls
+  undo: () => {
+    storeCallbacks.onUndo?.();
+  },
+  redo: () => {
+    storeCallbacks.onRedo?.();
+  },
+  
+  setUndoRedoState: (u: boolean, r: boolean) => set({ canUndo: u, canRedo: r }),
+  setSelectedNode: (n) => set({ selectedNode: n }),
+  toggleExpandNode: (id) => {
+    const s = get().expandedNodes;
+    const ns = new Set(s);
+    ns.has(id) ? ns.delete(id) : ns.add(id);
+    set({ expandedNodes: ns });
+  },
+  setError: (e) => set({ validationErrors: { error: e }, notification: { type: 'error', message: e } }),
+  setSaveComplete: (s, err) => set({ 
+    isSaving: false, 
+    notification: s ? { type: 'success', message: 'Dataset saved successfully' } : { type: 'error', message: err || 'Failed to save dataset' } 
+  }),
+  setSyncComplete: (s, err) => set({ 
+    isSyncing: false, 
+    syncProgress: 0, 
+    notification: s ? { type: 'success', message: 'Dataset synced' } : { type: 'error', message: err || 'Failed to sync' } 
+  }),
+  setValidationResults: (res) => set({ validationErrors: res.errors || {}, validationWarnings: res.warnings || {} }),
+  
+  saveDataset: () => {
+    set({ isSaving: true });
+    storeCallbacks.onSave?.();
+    return Promise.resolve();
+  },
+  saveDatasetAs: () => {
+    set({ isSaving: true });
+    storeCallbacks.onSaveAs?.();
+    return Promise.resolve();
+  },
+  syncDataset: () => {
     // Show confirmation dialog instead of immediately syncing
-    set({syncConfirmDialogOpen:true});
+    set({ syncConfirmDialogOpen: true });
     return Promise.resolve();
   },
-  setSyncConfirmDialogOpen:(open:boolean)=>set({syncConfirmDialogOpen:open}),
-  confirmSync:()=>{
+  setSyncConfirmDialogOpen: (open: boolean) => set({ syncConfirmDialogOpen: open }),
+  confirmSync: () => {
     // Close dialog and start sync
-    set({syncConfirmDialogOpen:false,isSyncing:true});
-    // Post message to VS Code to handle the actual sync
-    vscode.postMessage?.({type:'sync'});
+    set({ syncConfirmDialogOpen: false, isSyncing: true });
+    storeCallbacks.onSync?.();
     return Promise.resolve();
   },
-  toggleRightPanel:()=>set({rightPanelOpen:!get().rightPanelOpen}),
-  toggleNavPanel:()=>set({navPanelOpen:!get().navPanelOpen}),
-  setSelectedTab:(t)=>set({selectedTab:t}),
+  
+  toggleRightPanel: () => set({ rightPanelOpen: !get().rightPanelOpen }),
+  toggleNavPanel: () => set({ navPanelOpen: !get().navPanelOpen }),
+  setSelectedTab: (t) => set({ selectedTab: t }),
+  
   updateDataset: (field, value) => {
     const original = get().dataset as Dataset | null;
     if (!original) return;
+    
     // Work on the original instance so we keep methods, then create a shallow clone that preserves the prototype
     const dataset = original;
     
@@ -128,14 +177,13 @@ export const useLiPDStore = create<AppState>((set, get) => ({
     const cloned = Object.assign(Object.create(Object.getPrototypeOf(dataset)), dataset);
     set({ dataset: cloned });
 
-    vscode.postMessage({
-      type: 'datasetUpdated',
-      data: cloned
-    });
+    // Notify environment of dataset change
+    storeCallbacks.onDatasetUpdated?.(cloned);
   },
-  setExpandedNodes:(nodes)=>set({expandedNodes:nodes}),
-  setIsRemote:(b)=>set({isRemote:b}),
-  setDatasetName:(n)=>set({datasetName:n}),
-  setReadonly:(readonly:boolean)=>set({readonly}),
-  setNavPanelOpen:(open:boolean)=>set({navPanelOpen:open})
+  
+  setExpandedNodes: (nodes) => set({ expandedNodes: nodes }),
+  setIsRemote: (b) => set({ isRemote: b }),
+  setDatasetName: (n) => set({ datasetName: n }),
+  setReadonly: (readonly: boolean) => set({ readonly }),
+  setNavPanelOpen: (open: boolean) => set({ navPanelOpen: open })
 })); 

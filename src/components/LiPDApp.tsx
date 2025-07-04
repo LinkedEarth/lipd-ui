@@ -2,13 +2,29 @@ import React from 'react';
 import { Box } from '@mui/material';
 import { NavigationPanel } from './NavigationPanel';
 import { Router } from '../router';
-import Header from './Header';
+import Header, { HeaderProps } from './Header';
 import ConfirmDialog from './ConfirmDialog';
+import SyncProgressBar from './SyncProgressBar';
 import { useLiPDStore } from '../store';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-export const LiPDApp: React.FC = () => {
+export interface LiPDAppProps {
+  /**
+   * Props to pass to the Header component
+   */
+  headerProps?: HeaderProps;
+  
+  /**
+   * Whether to show the header at all
+   */
+  showHeader?: boolean;
+}
+
+export const LiPDApp: React.FC<LiPDAppProps> = ({ 
+  headerProps = {}, 
+  showHeader = true 
+}) => {
   const { 
     syncConfirmDialogOpen, 
     setSyncConfirmDialogOpen, 
@@ -44,7 +60,7 @@ export const LiPDApp: React.FC = () => {
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Top application bar */}
-      <Header />
+      {showHeader && <Header {...headerProps} />}
 
       {/* Main area */}
       <Box sx={{ display: 'flex', flex: '1 1 auto', overflow: 'hidden' }}>
@@ -108,6 +124,9 @@ export const LiPDApp: React.FC = () => {
         onConfirm={handleSyncConfirm}
         onCancel={handleSyncCancel}
       />
+
+      {/* Sync Progress Bar - shown when syncing */}
+      <SyncProgressBar />
     </Box>
   );
 }; 

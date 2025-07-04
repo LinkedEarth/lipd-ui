@@ -11,45 +11,44 @@ import {
   Paper, 
   Switch, 
   FormControlLabel,
-  Button,
-  Box
+  Box,
+  CircularProgress
 } from '@mui/material';
 import { 
   LiPDApp, 
   useLiPDStore, 
-  RouterProvider 
+  setLiPDStoreCallbacks,
+  RouterProvider,
+  SyncProgressBar 
 } from '@linkedearth/lipd-ui';
 
-import { LiPD, Dataset } from 'lipdjs';
 import { Logger, LogLevel } from 'lipdjs';
+import BrowserAppBarActions from './BrowserAppBarActions';
 
 // Enable debug-level logging to see all CSV lookup details
 const logger = Logger.getInstance();
 logger.setLogLevel(LogLevel.DEBUG);
 
-import JSZip from 'jszip';
-
-// Simple menu icon component for demo
-const MenuIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
-  </svg>
-);
+// Set up empty callbacks for browser environment
+// Browser uses the custom BrowserAppBarActions instead of store callbacks
+setLiPDStoreCallbacks({});
 
 const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isReadonly, setIsReadonly] = useState(false);
   
   const { 
-    setDataset, 
     setThemeMode, 
     setReadonly,
-    dataset 
+    dataset,
+    isLoading,
+    loadingMessage 
   } = useLiPDStore(state => ({
-    setDataset: state.setDataset,
     setThemeMode: state.setThemeMode,
     setReadonly: state.setReadonly,
-    dataset: state.dataset
+    dataset: state.dataset,
+    isLoading: state.isLoading,
+    loadingMessage: state.loadingMessage
   }));
 
   // Create theme
@@ -69,25 +68,6 @@ const App: React.FC = () => {
     setReadonly(isReadonly);
   }, [isReadonly, setReadonly]);
 
-  const handleUploadLIPD: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    
-    try {
-      const lipd = new LiPD();
-      await lipd.loadFromFile(files[0]);
-      const loadedDatasets = await lipd.getDatasets();
-      console.log(loadedDatasets);
-      if (loadedDatasets.length > 0) {
-        setDataset(loadedDatasets[0]);
-      }
-    } catch (err) {
-      console.error('Failed to load LiPD file', err);
-    }
-  };
-
-
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -98,67 +78,7 @@ const App: React.FC = () => {
           </Typography>
           
           {/* File operations */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Button variant="outlined" size="small" onClick={() => {
-              try {
-                // Create a new empty dataset with LiPD naming convention
-                const emptyDataset = new Dataset();
-                const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-                const datasetName = `Unnamed-Site.Author.${new Date().getFullYear()}`;
-                emptyDataset.setName(datasetName);
-                emptyDataset.setDatasetId(`DS${timestamp}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`);
-                setDataset(emptyDataset);
-              } catch (err) {
-                console.error('Failed to create new dataset', err);
-              }
-            }}>
-              New
-            </Button>
-            <Button
-              component="label"
-              variant="outlined"
-              size="small"
-            >
-              Open
-              <input
-                type="file"
-                hidden
-                accept=".lpd"
-                onChange={handleUploadLIPD}
-              />
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              disabled={!dataset}
-              onClick={async () => {
-                if (!dataset) return;
-                try {
-                  // Fix the internal ID to follow LiPD convention: http://linked.earth/lipd/[dsname]
-                  const datasetName = dataset.getName?.() || 'dataset';
-                  const correctInternalId = `http://linked.earth/lipd/${datasetName}`;
-                  
-                  // Set the correct internal ID
-                  (dataset as any)._id = correctInternalId;
-                  
-                  const lipd = new LiPD();
-                  lipd.loadDatasets([dataset]);
-                  
-                  const blob: Blob = await (lipd as any).createLipdBrowser(datasetName);
-                  const url = URL.createObjectURL(blob);
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.download = `${dataset.getName?.() || 'dataset'}.lpd`;
-                  link.click();
-                  URL.revokeObjectURL(url);
-                } catch (err) {
-                  console.error('Failed to export LiPD file', err);
-                }
-              }}
-            >
-              Save
-            </Button>
-          </Box>
+          <BrowserAppBarActions />
 
           {/* Settings toggles - compact */}
           <Box sx={{ 
@@ -204,16 +124,24 @@ const App: React.FC = () => {
           <Grid item xs={12} sx={{ flex: 1, minHeight: 0 }}>
             <Paper variant="outlined" sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column', borderRadius: 2 }}>
               <RouterProvider>
-                {dataset ? (
-                  <LiPDApp />
+                {isLoading ? (
+                  <Box sx={{display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',height:'100%',textAlign:'center',gap:2, p:4}}>
+                    <CircularProgress size={40} />
+                    <Typography variant="h5">Loading dataset...</Typography>
+                    {loadingMessage && (
+                      <Typography variant="body2" color="text.secondary">
+                        {loadingMessage}
+                      </Typography>
+                    )}
+                  </Box>
+                ) : dataset ? (
+                  <LiPDApp 
+                    headerProps={{ showAppBarActions: false }}
+                  />
                 ) : (
                   <Box sx={{display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',height:'100%',textAlign:'center',gap:2, p:4}}>
                     <Typography variant="h5">No dataset loaded</Typography>
-                    <Typography variant="body1">Click "Open" in the toolbar or choose a file below to get started.</Typography>
-                    <Button component="label" variant="contained">
-                      Choose LiPD File
-                      <input type="file" hidden accept=".lpd" onChange={handleUploadLIPD} />
-                    </Button>
+                    <Typography variant="body1">Use the "New" or "Open" buttons in the toolbar to get started.</Typography>
                   </Box>
                 )}
               </RouterProvider>
@@ -222,7 +150,8 @@ const App: React.FC = () => {
         </Grid>
       </Container>
 
-
+      {/* Sync Progress Bar - shown when syncing */}
+      <SyncProgressBar />
     </ThemeProvider>
   );
 };
