@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.3] - 2025-01-04
+
+### 🐛 Bug Fixes
+- **DataTable Cell Editing**: Fixed cell editing functionality in data tables
+  - Added missing `processRowUpdate` handler to DataGrid component
+  - Cell values now properly save when edited inline
+  - Enhanced error handling for cell update operations
+  - Improved data structure updates for table modifications
+
+### 📦 Dependencies
+- **lipdjs**: Updated from `^0.4.1` to `^0.4.2`
+  - Includes improved compression for LiPD file downloads
+  - Enhanced zip file generation with proper compression settings
+  - Better file size optimization for downloaded datasets
+
+### ✨ Enhancements
+- **File Downloads**: LiPD files now download with proper compression
+- **Data Editing**: Improved user experience for table data editing
+- **Performance**: Better file compression reduces download sizes
+
+---
+
 ## [0.5.2] - 2025-01-04
 
 ### 📦 Dependencies

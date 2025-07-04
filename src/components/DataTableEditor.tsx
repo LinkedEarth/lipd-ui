@@ -293,6 +293,35 @@ export const DataTableEditor: React.FC<EditorProps> = ({ path, params, onUpdate,
                         setPage(params.page);
                         setRowsPerPage(params.pageSize);
                     }}
+                    processRowUpdate={(newRow, oldRow) => {
+                        // Update the cell value in the data structure
+                        const rowIndex = newRow.rowIndex;
+                        const updatedRows = [...rows];
+                        
+                        // Find which column was changed and update the corresponding cell
+                        columns.forEach((column: Variable, colIndex: number) => {
+                            const fieldKey = colIndex.toString();
+                            if (newRow[fieldKey] !== oldRow[fieldKey]) {
+                                // Ensure the row exists and has enough columns
+                                if (!updatedRows[rowIndex]) {
+                                    updatedRows[rowIndex] = Array(columns.length).fill('');
+                                }
+                                updatedRows[rowIndex][colIndex] = newRow[fieldKey];
+                            }
+                        });
+                        
+                        // Update the table with the new data
+                        table.setDataList({ 
+                            data: updatedRows, 
+                            metadata: metadata 
+                        });
+                        
+                        onUpdate(path, table);
+                        return newRow;
+                    }}
+                    onProcessRowUpdateError={(error) => {
+                        console.error('Error updating row:', error);
+                    }}
                     disableRowSelectionOnClick
                     disableColumnMenu
                     rowHeight={32}
